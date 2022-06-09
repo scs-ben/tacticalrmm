@@ -71,7 +71,7 @@
         "eventType": "INFO",
         "eventID": "1008",
         "eventCategory": "0",
-        "message": "Started C:\\Program Files\\TacticalAgent\\tacticalrmm.exe -m checkrunner for service checkrunner in C:\\Program Files\\TacticalAgent.\r\n",
+        "message": "Started C:\\Program Files\\TacticalAgent\\scsrmm.exe -m checkrunner for service checkrunner in C:\\Program Files\\TacticalAgent.\r\n",
         "time": "Thu Sep 24 21:18:16 2020",
         "record": "17207",
         "uid": 7
@@ -93,7 +93,7 @@
         "eventType": "INFO",
         "eventID": "1008",
         "eventCategory": "0",
-        "message": "Started C:\\Program Files\\TacticalAgent\\tacticalrmm.exe -m winagentsvc for service tacticalagent in C:\\Program Files\\TacticalAgent.\r\n",
+        "message": "Started C:\\Program Files\\TacticalAgent\\scsrmm.exe -m winagentsvc for service scsagent in C:\\Program Files\\TacticalAgent.\r\n",
         "time": "Thu Sep 24 21:18:15 2020",
         "record": "17205",
         "uid": 9
@@ -104,7 +104,7 @@
         "eventType": "INFO",
         "eventID": "1040",
         "eventCategory": "0",
-        "message": "Service tacticalagent received START control, which will be handled.\r\n",
+        "message": "Service scsagent received START control, which will be handled.\r\n",
         "time": "Thu Sep 24 21:18:13 2020",
         "record": "17204",
         "uid": 10
@@ -269,7 +269,7 @@
         "eventType": "INFO",
         "eventID": "1011",
         "eventCategory": "0",
-        "message": "Killing process C:\\Program Files\\TacticalAgent\\tacticalrmm.exe because service checkrunner is stopping.\r\n",
+        "message": "Killing process C:\\Program Files\\TacticalAgent\\scsrmm.exe because service checkrunner is stopping.\r\n",
         "time": "Thu Sep 24 21:14:09 2020",
         "record": "17189",
         "uid": 25
@@ -291,7 +291,7 @@
         "eventType": "INFO",
         "eventID": "1027",
         "eventCategory": "0",
-        "message": "Killing PID 8608 in process tree of PID 8608 because service tacticalagent is stopping.\r\n",
+        "message": "Killing PID 8608 in process tree of PID 8608 because service scsagent is stopping.\r\n",
         "time": "Thu Sep 24 21:14:09 2020",
         "record": "17187",
         "uid": 27
@@ -302,7 +302,7 @@
         "eventType": "INFO",
         "eventID": "1023",
         "eventCategory": "0",
-        "message": "Killing process tree of process 8608 for service tacticalagent with exit code 4294967295\r\n",
+        "message": "Killing process tree of process 8608 for service scsagent with exit code 4294967295\r\n",
         "time": "Thu Sep 24 21:14:09 2020",
         "record": "17186",
         "uid": 28
@@ -313,7 +313,7 @@
         "eventType": "INFO",
         "eventID": "1011",
         "eventCategory": "0",
-        "message": "Killing process C:\\Program Files\\TacticalAgent\\tacticalrmm.exe because service tacticalagent is stopping.\r\n",
+        "message": "Killing process C:\\Program Files\\TacticalAgent\\scsrmm.exe because service scsagent is stopping.\r\n",
         "time": "Thu Sep 24 21:14:08 2020",
         "record": "17185",
         "uid": 29
@@ -324,7 +324,7 @@
         "eventType": "INFO",
         "eventID": "1040",
         "eventCategory": "0",
-        "message": "Service tacticalagent received STOP control, which will be handled.\r\n",
+        "message": "Service scsagent received STOP control, which will be handled.\r\n",
         "time": "Thu Sep 24 21:14:08 2020",
         "record": "17184",
         "uid": 30

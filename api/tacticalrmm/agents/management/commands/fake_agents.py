@@ -800,7 +800,7 @@ class Command(BaseCommand):
 
                     obj = dt.datetime.strptime(date_obj, "%Y-%m-%d %H:%M")
 
-                    task_name = "TacticalRMM_SchedReboot_" + "".join(
+                    task_name = "SCSRMM_SchedReboot_" + "".join(
                         random.choice(string.ascii_letters) for _ in range(10)
                     )
 

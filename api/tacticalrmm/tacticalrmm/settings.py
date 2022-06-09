@@ -19,14 +19,14 @@ AUTH_USER_MODEL = "accounts.User"
 # latest release
 TRMM_VERSION = "0.13.5-dev"
 
-# https://github.com/amidaware/tacticalrmm-web
+# https://github.com/scs-ben/tacticalrmm-web
 WEB_VERSION = "0.100.0-dev"
 
 # bump this version everytime vue code is changed
 # to alert user they need to manually refresh their browser
 APP_VER = "0.0.164"
 
-# https://github.com/amidaware/rmmagent
+# https://github.com/scs-ben/rmmagent
 LATEST_AGENT_VER = "2.0.4"
 
 MESH_VER = "1.0.22"
@@ -39,8 +39,8 @@ PIP_VER = "30"
 SETUPTOOLS_VER = "59.6.0"
 WHEEL_VER = "0.37.1"
 
-DL_64 = f"https://github.com/amidaware/rmmagent/releases/download/v{LATEST_AGENT_VER}/winagent-v{LATEST_AGENT_VER}.exe"
-DL_32 = f"https://github.com/amidaware/rmmagent/releases/download/v{LATEST_AGENT_VER}/winagent-v{LATEST_AGENT_VER}-x86.exe"
+DL_64 = f"https://github.com/scs-ben/rmmagent/releases/download/v{LATEST_AGENT_VER}/winagent-v{LATEST_AGENT_VER}.exe"
+DL_32 = f"https://github.com/scs-ben/rmmagent/releases/download/v{LATEST_AGENT_VER}/winagent-v{LATEST_AGENT_VER}-x86.exe"
 
 EXE_GEN_URL = "https://agents.tacticalrmm.com"
 
@@ -91,7 +91,7 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Tactical RMM API",
+    "TITLE": "SCS RMM API",
     "DESCRIPTION": "Simple and Fast remote monitoring and management tool",
     "VERSION": TRMM_VERSION,
     "AUTHENTICATION_WHITELIST": ["tacticalrmm.auth.APIAuthentication"],

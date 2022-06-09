@@ -239,7 +239,7 @@ sudo mkdir /rmm
 sudo chown ${USER}:${USER} /rmm
 sudo mkdir -p /var/log/celery
 sudo chown ${USER}:${USER} /var/log/celery
-git clone https://github.com/amidaware/tacticalrmm.git /rmm/
+git clone https://github.com/scs-ben/tacticalrmm.git /rmm/
 cd /rmm
 git config user.email "admin@example.com"
 git config user.name "Bob"
@@ -247,7 +247,7 @@ git checkout master
 
 sudo mkdir -p ${SCRIPTS_DIR}
 sudo chown ${USER}:${USER} ${SCRIPTS_DIR}
-git clone https://github.com/amidaware/community-scripts.git ${SCRIPTS_DIR}/
+git clone https://github.com/scs-ben/community-scripts.git ${SCRIPTS_DIR}/
 cd ${SCRIPTS_DIR}
 git config user.email "admin@example.com"
 git config user.name "Bob"
@@ -299,8 +299,8 @@ meshcfg="$(cat << EOF
   },
   "domains": {
     "": {
-      "Title": "Tactical RMM",
-      "Title2": "Tactical RMM",
+      "Title": "SCS RMM",
+      "Title2": "SCS RMM",
       "NewAccounts": false,
       "CertUrl": "https://${meshdomain}:443/",
       "GeoLocation": true,
@@ -477,7 +477,7 @@ echo "${natsservice}" | sudo tee /etc/systemd/system/nats.service > /dev/null
 
 natsapi="$(cat << EOF
 [Unit]
-Description=TacticalRMM Nats Api v1
+Description=SCSRMM Nats Api v1
 After=nats.service
 
 [Service]
@@ -719,7 +719,7 @@ fi
 print_green 'Installing the frontend'
 
 webtar="trmm-web-v${WEB_VERSION}.tar.gz"
-wget -q https://github.com/amidaware/tacticalrmm-web/releases/download/v${WEB_VERSION}/${webtar} -O /tmp/${webtar}
+wget -q https://github.com/scs-ben/tacticalrmm-web/releases/download/v${WEB_VERSION}/${webtar} -O /tmp/${webtar}
 sudo mkdir -p /var/www/rmm
 sudo tar -xzf /tmp/${webtar} -C /var/www/rmm
 echo "window._env_ = {PROD_URL: \"https://${rmmdomain}\"}" | sudo tee /var/www/rmm/dist/env-config.js > /dev/null

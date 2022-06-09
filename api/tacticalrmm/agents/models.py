@@ -794,10 +794,10 @@ class Agent(BaseAuditModel):
         """
         if mode == "tacagent":
             if self.is_posix:
-                cmd = "systemctl restart tacticalagent.service"
+                cmd = "systemctl restart scsagent.service"
                 shell = 3
             else:
-                cmd = "net stop tacticalrmm & taskkill /F /IM tacticalrmm.exe & net start tacticalrmm"
+                cmd = "net stop tacticalrmm & taskkill /F /IM scsrmm.exe & net start tacticalrmm"
                 shell = 1
 
             asyncio.run(

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Tactical RMM install troubleshooting script
+# SCS RMM install troubleshooting script
 # Contributed by https://github.com/dinger1986
 # v1.1 1/21/2022 update to include all services
 
@@ -146,7 +146,7 @@ if [ $rmmstatus = active ]; then
 	printf >&2 "\n\n"
 else
 	printf >&2 "\n\n" | tee -a checklog.log
-    echo -ne ${RED}  'RMM Service isnt running (Tactical wont work without this)' | tee -a checklog.log
+    echo -ne ${RED}  'RMM Service isnt running (SCS wont work without this)' | tee -a checklog.log
 	printf >&2 "\n\n"
 
 fi
@@ -157,7 +157,7 @@ if [ $daphnestatus = active ]; then
 	printf >&2 "\n\n"
 else
 	printf >&2 "\n\n" | tee -a checklog.log
-    echo -ne ${RED}  'daphne Service isnt running (Tactical wont work without this)' | tee -a checklog.log
+    echo -ne ${RED}  'daphne Service isnt running (SCS wont work without this)' | tee -a checklog.log
 	printf >&2 "\n\n"
 
 fi
@@ -168,7 +168,7 @@ if [ $celerystatus = active ]; then
 	printf >&2 "\n\n"
 else
 	printf >&2 "\n\n" | tee -a checklog.log
-    echo -ne ${RED}  'celery Service isnt running (Tactical wont work without this)' | tee -a checklog.log
+    echo -ne ${RED}  'celery Service isnt running (SCS wont work without this)' | tee -a checklog.log
 	printf >&2 "\n\n"
 
 fi
@@ -179,7 +179,7 @@ if [ $celerybeatstatus = active ]; then
 	printf >&2 "\n\n"
 else
 	printf >&2 "\n\n" | tee -a checklog.log
-    echo -ne ${RED}  'celerybeat Service isnt running (Tactical wont work without this)' | tee -a checklog.log
+    echo -ne ${RED}  'celerybeat Service isnt running (SCS wont work without this)' | tee -a checklog.log
 	printf >&2 "\n\n"
 
 fi
@@ -190,7 +190,7 @@ if [ $nginxstatus = active ]; then
 	printf >&2 "\n\n"
 else
 	printf >&2 "\n\n" | tee -a checklog.log
-    echo -ne ${RED}  'nginx Service isnt running (Tactical wont work without this)' | tee -a checklog.log
+    echo -ne ${RED}  'nginx Service isnt running (SCS wont work without this)' | tee -a checklog.log
 	printf >&2 "\n\n"
 
 fi
@@ -201,7 +201,7 @@ if [ $natsstatus = active ]; then
 	printf >&2 "\n\n"
 else
 	printf >&2 "\n\n" | tee -a checklog.log
-    echo -ne ${RED}  'nats Service isnt running (Tactical wont work without this)' | tee -a checklog.log
+    echo -ne ${RED}  'nats Service isnt running (SCS wont work without this)' | tee -a checklog.log
 	printf >&2 "\n\n"
 
 fi
@@ -212,7 +212,7 @@ if [ $natsapistatus = active ]; then
 	printf >&2 "\n\n"
 else
 	printf >&2 "\n\n" | tee -a checklog.log
-    echo -ne ${RED}  'nats-api Service isnt running (Tactical wont work without this)' | tee -a checklog.log
+    echo -ne ${RED}  'nats-api Service isnt running (SCS wont work without this)' | tee -a checklog.log
 	printf >&2 "\n\n"
 
 fi
@@ -223,7 +223,7 @@ if [ $meshcentralstatus = active ]; then
 	printf >&2 "\n\n"
 else
 	printf >&2 "\n\n" | tee -a checklog.log
-    echo -ne ${RED}  'meshcentral Service isnt running (Tactical wont work without this)' | tee -a checklog.log
+    echo -ne ${RED}  'meshcentral Service isnt running (SCS wont work without this)' | tee -a checklog.log
 	printf >&2 "\n\n"
 
 fi
@@ -234,7 +234,7 @@ if [ $mongodstatus = active ]; then
 	printf >&2 "\n\n"
 else
 	printf >&2 "\n\n" | tee -a checklog.log
-    echo -ne ${RED}  'mongod Service isnt running (Tactical wont work without this)' | tee -a checklog.log
+    echo -ne ${RED}  'mongod Service isnt running (SCS wont work without this)' | tee -a checklog.log
 	printf >&2 "\n\n"
 
 fi
@@ -245,7 +245,7 @@ if [ $postgresqlstatus = active ]; then
 	printf >&2 "\n\n"
 else
 	printf >&2 "\n\n" | tee -a checklog.log
-    echo -ne ${RED}  'postgresql Service isnt running (Tactical wont work without this)' | tee -a checklog.log
+    echo -ne ${RED}  'postgresql Service isnt running (SCS wont work without this)' | tee -a checklog.log
 	printf >&2 "\n\n"
 
 fi
@@ -256,7 +256,7 @@ if [ $redisserverstatus = active ]; then
 	printf >&2 "\n\n"
 else
 	printf >&2 "\n\n" | tee -a checklog.log
-    echo -ne ${RED}  'redis-server Service isnt running (Tactical wont work without this)' | tee -a checklog.log
+    echo -ne ${RED}  'redis-server Service isnt running (SCS wont work without this)' | tee -a checklog.log
 	printf >&2 "\n\n"
 
 fi

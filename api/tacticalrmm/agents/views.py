@@ -450,7 +450,7 @@ class Reboot(APIView):
         except Exception:
             return notify_error("Invalid date")
 
-        task_name = "TacticalRMM_SchedReboot_" + "".join(
+        task_name = "SCSRMM_SchedReboot_" + "".join(
             random.choice(string.ascii_letters) for _ in range(10)
         )
 
@@ -578,7 +578,7 @@ def install_agent(request):
             "-n",
             "5",
             "&&",
-            r'"C:\Program Files\TacticalAgent\tacticalrmm.exe"',
+            r'"C:\Program Files\SCSAgent\scsrmm.exe"',
             "-m",
             "install",
             "--api",

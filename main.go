@@ -6,7 +6,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/amidaware/tacticalrmm/natsapi"
+	"github.com/scs-ben/tacticalrmm/natsapi"
 	"github.com/sirupsen/logrus"
 )
 

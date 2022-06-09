@@ -13,9 +13,9 @@ $apilink = $downloadlink.split('/')
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$serviceName = 'tacticalagent'
+$serviceName = 'scsagent'
 If (Get-Service $serviceName -ErrorAction SilentlyContinue) {
-    write-host ('Tactical RMM Is Already Installed')
+    write-host ('SCS RMM Is Already Installed')
 } Else {
     $OutPath = $env:TMP
     $output = $innosetup
@@ -62,7 +62,7 @@ If (Get-Service $serviceName -ErrorAction SilentlyContinue) {
             Start-Process -FilePath $OutPath\$output -ArgumentList ('/VERYSILENT /SUPPRESSMSGBOXES') -Wait
             write-host ('Extracting...')
             Start-Sleep -s 5
-            Start-Process -FilePath "C:\Program Files\TacticalAgent\tacticalrmm.exe" -ArgumentList $installArgs -Wait
+            Start-Process -FilePath "C:\Program Files\TacticalAgent\scsrmm.exe" -ArgumentList $installArgs -Wait
             exit 0
         }
         Catch

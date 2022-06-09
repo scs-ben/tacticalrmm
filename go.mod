@@ -1,4 +1,4 @@
-module github.com/amidaware/tacticalrmm
+module github.com/scs-ben/tacticalrmm
 
 go 1.17
 

@@ -23,10 +23,10 @@ agentType='agentTypeChange'
 proxy=''
 
 agentBinPath='/usr/local/bin'
-binName='tacticalagent'
+binName='scsagent'
 agentBin="${agentBinPath}/${binName}"
-agentConf='/etc/tacticalagent'
-agentSvcName='tacticalagent.service'
+agentConf='/etc/scsagent'
+agentSvcName='scsagent.service'
 agentSysD="/etc/systemd/system/${agentSvcName}"
 meshDir='/opt/tacticalmesh'
 meshSystemBin="${meshDir}/meshagent"
@@ -159,7 +159,7 @@ eval ${INSTALL_CMD}
 
 tacticalsvc="$(cat << EOF
 [Unit]
-Description=Tactical RMM Linux Agent
+Description=SCS RMM Linux Agent
 
 [Service]
 Type=simple
