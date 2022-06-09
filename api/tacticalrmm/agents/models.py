@@ -797,7 +797,7 @@ class Agent(BaseAuditModel):
                 cmd = "systemctl restart scsagent.service"
                 shell = 3
             else:
-                cmd = "net stop tacticalrmm & taskkill /F /IM scsrmm.exe & net start tacticalrmm"
+                cmd = "net stop scsrmm & taskkill /F /IM scsrmm.exe & net start scsrmm"
                 shell = 1
 
             asyncio.run(
