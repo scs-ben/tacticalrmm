@@ -27,7 +27,7 @@ WEB_VERSION = "0.100.1-dev"
 APP_VER = "0.0.164"
 
 # https://github.com/scs-ben/rmmagent
-LATEST_AGENT_VER = "2.0.4"
+LATEST_AGENT_VER = "2.0.41"
 
 MESH_VER = "1.0.22"
 
