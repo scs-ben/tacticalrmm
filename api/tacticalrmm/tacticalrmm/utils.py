@@ -246,7 +246,7 @@ KnoxAuthMiddlewareStack = lambda inner: KnoxAuthMiddlewareInstance(
 
 
 def get_latest_trmm_ver() -> str:
-    url = "https://raw.githubusercontent.com/amidaware/tacticalrmm/master/api/tacticalrmm/tacticalrmm/settings.py"
+    url = "https://raw.githubusercontent.com/scs-ben/tacticalrmm/master/api/tacticalrmm/tacticalrmm/settings.py"
     try:
         r = requests.get(url, timeout=5)
     except:

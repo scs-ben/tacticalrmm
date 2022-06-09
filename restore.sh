@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_VERSION="37"
-SCRIPT_URL='https://raw.githubusercontent.com/amidaware/tacticalrmm/master/restore.sh'
+SCRIPT_URL='https://raw.githubusercontent.com/scs-ben/tacticalrmm/master/restore.sh'
 
 sudo apt update
 sudo apt install -y curl wget dirmngr gnupg lsb-release

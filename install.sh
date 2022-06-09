@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_VERSION="63"
-SCRIPT_URL='https://raw.githubusercontent.com/amidaware/tacticalrmm/master/install.sh'
+SCRIPT_URL='https://raw.githubusercontent.com/scs-ben/tacticalrmm/master/install.sh'
 
 sudo apt install -y curl wget dirmngr gnupg lsb-release
 
