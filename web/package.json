@@ -2,7 +2,7 @@
   "name": "web",
   "version": "0.1.8",
   "private": true,
-  "productName": "Tactical RMM",
+  "productName": "SCS RMM",
   "scripts": {
     "serve": "quasar dev",
     "build": "quasar build",

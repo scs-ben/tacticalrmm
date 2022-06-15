@@ -15,7 +15,7 @@ $apilink = $downloadlink.split('/')
 
 $serviceName = 'tacticalagent'
 If (Get-Service $serviceName -ErrorAction SilentlyContinue) {
-    write-host ('Tactical RMM Is Already Installed')
+    write-host ('SCS RMM Is Already Installed')
 } Else {
     $OutPath = $env:TMP
     $output = $innosetup

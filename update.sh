@@ -9,9 +9,8 @@ RED='\033[0;31m'
 NC='\033[0m'
 THIS_SCRIPT=$(readlink -f "$0")
 
-SCRIPTS_DIR='/opt/trmm-community-scripts'
-PYTHON_VER='3.10.4'
-SETTINGS_FILE='/rmm/api/tacticalrmm/tacticalrmm/settings.py'
+SCRIPTS_DIR="/opt/trmm-community-scripts"
+PYTHON_VER="3.10.4"
 
 TMP_FILE=$(mktemp -p "" "rmmupdate_XXXXXXXXXX")
 curl -s -L "${SCRIPT_URL}" > ${TMP_FILE}
@@ -47,6 +46,7 @@ fi
 
 TMP_SETTINGS=$(mktemp -p "" "rmmsettings_XXXXXXXXXX")
 curl -s -L "${LATEST_SETTINGS_URL}" > ${TMP_SETTINGS}
+SETTINGS_FILE="/rmm/api/tacticalrmm/tacticalrmm/settings.py"
 
 LATEST_TRMM_VER=$(grep "^TRMM_VERSION" "$TMP_SETTINGS" | awk -F'[= "]' '{print $5}')
 CURRENT_TRMM_VER=$(grep "^TRMM_VERSION" "$SETTINGS_FILE" | awk -F'[= "]' '{print $5}')
@@ -59,9 +59,11 @@ fi
 
 LATEST_MESH_VER=$(grep "^MESH_VER" "$TMP_SETTINGS" | awk -F'[= "]' '{print $5}')
 LATEST_PIP_VER=$(grep "^PIP_VER" "$TMP_SETTINGS" | awk -F'[= "]' '{print $5}')
+LATEST_NPM_VER=$(grep "^NPM_VER" "$TMP_SETTINGS" | awk -F'[= "]' '{print $5}')
 NATS_SERVER_VER=$(grep "^NATS_SERVER_VER" "$TMP_SETTINGS" | awk -F'[= "]' '{print $5}')
 
 CURRENT_PIP_VER=$(grep "^PIP_VER" "$SETTINGS_FILE" | awk -F'[= "]' '{print $5}')
+CURRENT_NPM_VER=$(grep "^NPM_VER" "$SETTINGS_FILE" | awk -F'[= "]' '{print $5}')
 
 cls() {
   printf "\033c"
@@ -111,6 +113,10 @@ do
 printf >&2 "${GREEN}Stopping ${i} service...${NC}\n"
 sudo systemctl stop ${i}
 done
+
+printf >&2 "${GREEN}Restarting postgresql database${NC}\n"
+sudo systemctl restart postgresql
+sleep 5
 
 rm -f /rmm/api/tacticalrmm/app.ini
 
@@ -295,8 +301,6 @@ python manage.py load_chocos
 python manage.py create_installer_user
 python manage.py create_natsapi_conf
 python manage.py post_update_tasks
-API=$(python manage.py get_config api)
-WEB_VERSION=$(python manage.py get_config webversion)
 deactivate
 
 printf >&2 "${GREEN}Turning off redis aof${NC}\n"
@@ -304,22 +308,18 @@ sudo redis-cli config set appendonly no
 sudo redis-cli config rewrite
 sudo rm -f /var/lib/redis/appendonly.aof
 
-
-if [ -d /rmm/web ]; then
-  rm -rf /rmm/web
+rm -rf /rmm/web/dist
+rm -rf /rmm/web/.quasar
+cd /rmm/web
+if [[ "${CURRENT_NPM_VER}" != "${LATEST_NPM_VER}" ]] || [[ "$force" = true ]]; then
+  rm -rf /rmm/web/node_modules
 fi
 
-if [ ! -d /var/www/rmm ]; then
-  sudo mkdir -p /var/www/rmm
-fi
-
-webtar="trmm-web-v${WEB_VERSION}.tar.gz"
-wget -q https://github.com/scs-ben/tacticalrmm-web/releases/download/v${WEB_VERSION}/${webtar} -O /tmp/${webtar}
+npm install
+npm run build
 sudo rm -rf /var/www/rmm/dist
-sudo tar -xzf /tmp/${webtar} -C /var/www/rmm
-echo "window._env_ = {PROD_URL: \"https://${API}\"}" | sudo tee /var/www/rmm/dist/env-config.js > /dev/null
+sudo cp -pr /rmm/web/dist /var/www/rmm/
 sudo chown www-data:www-data -R /var/www/rmm/dist
-rm -f /tmp/${webtar}
 
 for i in nats nats-api rmm daphne celery celerybeat nginx
 do

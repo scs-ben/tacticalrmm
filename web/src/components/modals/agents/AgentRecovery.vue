@@ -25,7 +25,7 @@
           terminal and file browser.
         </q-card-section>
         <q-card-section v-else-if="state.mode === 'tacagent'">
-          Fix issues with the Tactical RMM Agent service.
+          Fix issues with the SCS RMM Agent service.
         </q-card-section>
         <q-card-actions align="right">
           <q-btn dense flat push label="Cancel" v-close-popup />

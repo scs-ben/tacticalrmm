@@ -52,8 +52,8 @@ if [ ! -f "/home/node/app/meshcentral-data/config.json" ] || [[ "${MESH_PERSISTE
   },
   "domains": {
     "": {
-      "Title": "Tactical RMM",
-      "Title2": "TacticalRMM",
+      "Title": "SCS RMM",
+      "Title2": "SCSRMM",
       "NewAccounts": false,
       "mstsc": true,
       "GeoLocation": true,

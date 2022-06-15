@@ -92,7 +92,7 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Tactical RMM API",
+    "TITLE": "SCS RMM API",
     "DESCRIPTION": "Simple and Fast remote monitoring and management tool",
     "VERSION": TRMM_VERSION,
     "AUTHENTICATION_WHITELIST": ["tacticalrmm.auth.APIAuthentication"],

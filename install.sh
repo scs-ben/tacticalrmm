@@ -296,8 +296,8 @@ meshcfg="$(cat << EOF
   },
   "domains": {
     "": {
-      "Title": "Tactical RMM",
-      "Title2": "Tactical RMM",
+      "Title": "SCS RMM",
+      "Title2": "SCS RMM",
       "NewAccounts": false,
       "CertUrl": "https://${meshdomain}:443/",
       "GeoLocation": true,

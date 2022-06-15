@@ -96,7 +96,7 @@ def email_test(request):
     core = get_core_settings()
 
     msg, ok = core.send_mail(
-        subject="Test from Tactical RMM", body="This is a test message", test=True
+        subject="Test from SCS RMM", body="This is a test message", test=True
     )
     if not ok:
         return notify_error(msg)

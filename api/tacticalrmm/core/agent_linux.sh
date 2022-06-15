@@ -159,7 +159,7 @@ eval ${INSTALL_CMD}
 
 tacticalsvc="$(cat << EOF
 [Unit]
-Description=Tactical RMM Linux Agent
+Description=SCS RMM Linux Agent
 
 [Service]
 Type=simple
