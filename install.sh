@@ -11,9 +11,8 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-SCRIPTS_DIR='/opt/trmm-community-scripts'
-PYTHON_VER='3.10.4'
-SETTINGS_FILE='/rmm/api/tacticalrmm/tacticalrmm/settings.py'
+SCRIPTS_DIR="/opt/trmm-community-scripts"
+PYTHON_VER="3.10.4"
 
 TMP_FILE=$(mktemp -p "" "rmminstall_XXXXXXXXXX")
 curl -s -L "${SCRIPT_URL}" > ${TMP_FILE}
@@ -194,7 +193,7 @@ sudo apt install -y mongodb-org
 sudo systemctl enable mongod
 sudo systemctl restart mongod
 
-print_green "Installing Python ${PYTHON_VER}"
+print_green 'Installing Python 3.10.4'
 
 sudo apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev libbz2-dev
 numprocs=$(nproc)
@@ -233,8 +232,6 @@ sudo -u postgres psql -c "ALTER ROLE ${pgusername} SET default_transaction_isola
 sudo -u postgres psql -c "ALTER ROLE ${pgusername} SET timezone TO 'UTC'"
 sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE tacticalrmm TO ${pgusername}"
 
-print_green 'Cloning repos'
-
 sudo mkdir /rmm
 sudo chown ${USER}:${USER} /rmm
 sudo mkdir -p /var/log/celery
@@ -255,7 +252,7 @@ git checkout main
 
 print_green 'Downloading NATS'
 
-NATS_SERVER_VER=$(grep "^NATS_SERVER_VER" "$SETTINGS_FILE" | awk -F'[= "]' '{print $5}')
+NATS_SERVER_VER=$(grep "^NATS_SERVER_VER" /rmm/api/tacticalrmm/tacticalrmm/settings.py | awk -F'[= "]' '{print $5}')
 nats_tmp=$(mktemp -d -t nats-XXXXXXXXXX)
 wget https://github.com/nats-io/nats-server/releases/download/v${NATS_SERVER_VER}/nats-server-v${NATS_SERVER_VER}-linux-amd64.tar.gz -P ${nats_tmp}
 tar -xzf ${nats_tmp}/nats-server-v${NATS_SERVER_VER}-linux-amd64.tar.gz -C ${nats_tmp}
@@ -266,7 +263,7 @@ rm -rf ${nats_tmp}
 
 print_green 'Installing MeshCentral'
 
-MESH_VER=$(grep "^MESH_VER" "$SETTINGS_FILE" | awk -F'[= "]' '{print $5}')
+MESH_VER=$(grep "^MESH_VER" /rmm/api/tacticalrmm/tacticalrmm/settings.py | awk -F'[= "]' '{print $5}')
 
 sudo mkdir -p /meshcentral/meshcentral-data
 sudo chown ${USER}:${USER} -R /meshcentral
@@ -299,8 +296,8 @@ meshcfg="$(cat << EOF
   },
   "domains": {
     "": {
-      "Title": "SCS RMM",
-      "Title2": "SCS RMM",
+      "Title": "Tactical RMM",
+      "Title2": "Tactical RMM",
       "NewAccounts": false,
       "CertUrl": "https://${meshdomain}:443/",
       "GeoLocation": true,
@@ -351,8 +348,8 @@ sudo chmod +x /usr/local/bin/nats-api
 
 print_green 'Installing the backend'
 
-SETUPTOOLS_VER=$(grep "^SETUPTOOLS_VER" "$SETTINGS_FILE" | awk -F'[= "]' '{print $5}')
-WHEEL_VER=$(grep "^WHEEL_VER" "$SETTINGS_FILE" | awk -F'[= "]' '{print $5}')
+SETUPTOOLS_VER=$(grep "^SETUPTOOLS_VER" /rmm/api/tacticalrmm/tacticalrmm/settings.py | awk -F'[= "]' '{print $5}')
+WHEEL_VER=$(grep "^WHEEL_VER" /rmm/api/tacticalrmm/tacticalrmm/settings.py | awk -F'[= "]' '{print $5}')
 
 cd /rmm/api
 python3.10 -m venv env
@@ -366,7 +363,6 @@ python manage.py collectstatic --no-input
 python manage.py create_natsapi_conf
 python manage.py load_chocos
 python manage.py load_community_scripts
-WEB_VERSION=$(python manage.py get_config webversion)
 printf >&2 "${YELLOW}%0.s*${NC}" {1..80}
 printf >&2 "\n"
 printf >&2 "${YELLOW}Please create your login for the RMM website and django admin${NC}\n"
@@ -477,7 +473,7 @@ echo "${natsservice}" | sudo tee /etc/systemd/system/nats.service > /dev/null
 
 natsapi="$(cat << EOF
 [Unit]
-Description=SCSRMM Nats Api v1
+Description=TacticalRMM Nats Api v1
 After=nats.service
 
 [Service]
@@ -542,6 +538,15 @@ server {
         alias /rmm/api/tacticalrmm/tacticalrmm/private/;
     }
 
+    location ~ ^/(natsapi) {
+        allow 127.0.0.1;
+        deny all;
+        uwsgi_pass tacticalrmm;
+        include     /etc/nginx/uwsgi_params;
+        uwsgi_read_timeout 500s;
+        uwsgi_ignore_client_abort on;
+    }
+
     location ~ ^/ws/ {
         proxy_pass http://unix:/rmm/daphne.sock;
 
@@ -559,7 +564,7 @@ server {
     location / {
         uwsgi_pass  tacticalrmm;
         include     /etc/nginx/uwsgi_params;
-        uwsgi_read_timeout 300s;
+        uwsgi_read_timeout 9999s;
         uwsgi_ignore_client_abort on;
     }
 }
@@ -716,15 +721,21 @@ if [ -d ~/.config ]; then
   sudo chown -R $USER:$GROUP ~/.config
 fi
 
+quasarenv="$(cat << EOF
+PROD_URL = "https://${rmmdomain}"
+DEV_URL = "https://${rmmdomain}"
+EOF
+)"
+echo "${quasarenv}" | tee /rmm/web/.env > /dev/null
+
 print_green 'Installing the frontend'
 
-webtar="trmm-web-v${WEB_VERSION}.tar.gz"
-wget -q https://github.com/scs-ben/tacticalrmm-web/releases/download/v${WEB_VERSION}/${webtar} -O /tmp/${webtar}
+cd /rmm/web
+npm install
+npm run build
 sudo mkdir -p /var/www/rmm
-sudo tar -xzf /tmp/${webtar} -C /var/www/rmm
-echo "window._env_ = {PROD_URL: \"https://${rmmdomain}\"}" | sudo tee /var/www/rmm/dist/env-config.js > /dev/null
+sudo cp -pvr /rmm/web/dist /var/www/rmm/
 sudo chown www-data:www-data -R /var/www/rmm/dist
-rm -f /tmp/${webtar}
 
 nginxfrontend="$(cat << EOF
 server {
