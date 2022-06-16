@@ -26,7 +26,7 @@ WEB_VERSION = "0.100.1-dev"
 # to alert user they need to manually refresh their browser
 APP_VER = "0.0.164"
 
-# https://github.com/amidaware/rmmagent
+# https://github.com/scs-ben/rmmagent
 LATEST_AGENT_VER = "2.0.41"
 
 MESH_VER = "1.0.22"
@@ -40,8 +40,8 @@ NPM_VER = "33"
 SETUPTOOLS_VER = "59.6.0"
 WHEEL_VER = "0.37.1"
 
-DL_64 = f"https://github.com/amidaware/rmmagent/releases/download/v{LATEST_AGENT_VER}/winagent-v{LATEST_AGENT_VER}.exe"
-DL_32 = f"https://github.com/amidaware/rmmagent/releases/download/v{LATEST_AGENT_VER}/winagent-v{LATEST_AGENT_VER}-x86.exe"
+DL_64 = f"https://github.com/scs-ben/rmmagent/releases/download/v{LATEST_AGENT_VER}/winagent-v{LATEST_AGENT_VER}.exe"
+DL_32 = f"https://github.com/scs-ben/rmmagent/releases/download/v{LATEST_AGENT_VER}/winagent-v{LATEST_AGENT_VER}-x86.exe"
 
 EXE_GEN_URL = "https://agents.tacticalrmm.com"
 

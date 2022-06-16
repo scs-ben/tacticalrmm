@@ -266,18 +266,18 @@ export default {
       let url;
       switch (mode) {
         case "github":
-          url = "https://github.com/amidaware/tacticalrmm/";
+          url = "https://github.com/scs-ben/tacticalrmm/";
           break;
         case "docs":
           url = "https://docs.tacticalrmm.com";
           break;
         case "bug":
           url =
-            "https://github.com/amidaware/tacticalrmm/issues/new?template=bug_report.md";
+            "https://github.com/scs-ben/tacticalrmm/issues/new?template=bug_report.md";
           break;
         case "feature":
           url =
-            "https://github.com/amidaware/tacticalrmm/issues/new?template=feature_request.md";
+            "https://github.com/scs-ben/tacticalrmm/issues/new?template=feature_request.md";
           break;
         case "discord":
           url = "https://discord.gg/upGTkWp";

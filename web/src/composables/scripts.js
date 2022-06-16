@@ -12,7 +12,7 @@ export function useScriptDropdown(setScript = null, { onMount = false } = {}) {
   const syntax = ref("");
   const link = ref("");
   const baseUrl =
-    "https://github.com/amidaware/community-scripts/blob/main/scripts/";
+    "https://github.com/scs-ben/community-scripts/blob/main/scripts/";
 
   // specify parameters to filter out community scripts
   async function getScriptOptions(showCommunityScripts = false) {
