@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-SCRIPT_VERSION="135"
+SCRIPT_VERSION="136"
 SCRIPT_URL='https://raw.githubusercontent.com/scs-ben/tacticalrmm/master/update.sh'
 LATEST_SETTINGS_URL='https://raw.githubusercontent.com/scs-ben/tacticalrmm/master/api/tacticalrmm/tacticalrmm/settings.py'
 YELLOW='\033[1;33m'
@@ -98,6 +98,28 @@ echo "${natsservice}" | sudo tee /etc/systemd/system/nats.service > /dev/null
 sudo systemctl daemon-reload
 fi
 
+rmmconf='/etc/nginx/sites-available/rmm.conf'
+CHECK_NATS_WEBSOCKET=$(grep natsws $rmmconf)
+if ! [[ $CHECK_NATS_WEBSOCKET ]]; then
+  echo "Adding nats websocket to nginx config"
+  echo "$(awk '
+  /location \/ {/ {
+      print "    location ~ ^/natsws {"
+      print "        proxy_pass http://127.0.0.1:9235;"
+      print "        proxy_http_version 1.1;"
+      print "        proxy_set_header Host $host;"
+      print "        proxy_set_header Upgrade $http_upgrade;"
+      print "        proxy_set_header Connection \"upgrade\";"
+      print "        proxy_set_header X-Forwarded-Host $host:$server_port;"
+      print "        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;"
+      print "        proxy_set_header X-Forwarded-Proto $scheme;"
+      print "    }"
+      print "\n"
+  }
+  { print }
+  ' $rmmconf)" | sudo tee $rmmconf > /dev/null
+fi
+
 if ! sudo nginx -t > /dev/null 2>&1; then
   sudo nginx -t
   echo -ne "\n"
@@ -114,22 +136,12 @@ done
 
 rm -f /rmm/api/tacticalrmm/app.ini
 
-numprocs=$(nproc)
-uwsgiprocs=4
-if [[ "$numprocs" == "1" ]]; then
-  uwsgiprocs=2
-else
-  uwsgiprocs=$numprocs
-fi
-
 uwsgini="$(cat << EOF
 [uwsgi]
 chdir = /rmm/api/tacticalrmm
 module = tacticalrmm.wsgi
 home = /rmm/api/env
 master = true
-processes = ${uwsgiprocs}
-threads = ${uwsgiprocs}
 enable-threads = true
 socket = /rmm/api/tacticalrmm/tacticalrmm.sock
 harakiri = 300
@@ -139,6 +151,16 @@ vacuum = true
 die-on-term = true
 max-requests = 500
 disable-logging = true
+cheaper-algo = busyness
+cheaper = 4
+cheaper-initial = 4
+workers = 20
+cheaper-step = 2
+cheaper-overload = 3
+cheaper-busyness-min = 5
+cheaper-busyness-max = 10
+# stats = /tmp/stats.socket # uncomment when debugging
+# cheaper-busyness-verbose = true # uncomment when debugging
 EOF
 )"
 echo "${uwsgini}" > /rmm/api/tacticalrmm/app.ini

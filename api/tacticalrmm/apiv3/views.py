@@ -35,6 +35,7 @@ from tacticalrmm.constants import (
     AuditObjType,
     CheckStatus,
     DebugLogType,
+    GoArch,
     MeshAgentIdent,
     PAStatus,
 )
@@ -396,9 +397,9 @@ class MeshExe(APIView):
 
     def post(self, request):
         match request.data:
-            case {"arch": "64", "plat": AgentPlat.WINDOWS}:
+            case {"goarch": GoArch.AMD64, "plat": AgentPlat.WINDOWS}:
                 arch = MeshAgentIdent.WIN64
-            case {"arch": "32", "plat": AgentPlat.WINDOWS}:
+            case {"goarch": GoArch.i386, "plat": AgentPlat.WINDOWS}:
                 arch = MeshAgentIdent.WIN32
             case _:
                 return notify_error("Arch not specified")
@@ -505,7 +506,10 @@ class Installer(APIView):
             return notify_error("Invalid data")
 
         ver = request.data["version"]
-        if pyver.parse(ver) < pyver.parse(settings.LATEST_AGENT_VER):
+        if (
+            pyver.parse(ver) < pyver.parse(settings.LATEST_AGENT_VER)
+            and not "-dev" in settings.LATEST_AGENT_VER
+        ):
             return notify_error(
                 f"Old installer detected (version {ver} ). Latest version is {settings.LATEST_AGENT_VER} Please generate a new installer from the RMM"
             )

@@ -11,7 +11,7 @@ from rest_framework.authtoken.models import Token
 from agents.models import Agent
 from core.utils import get_core_settings
 from logs.models import PendingAction
-from tacticalrmm.constants import CustomFieldModel, PAAction, PAStatus, CONFIG_MGMT_CMDS
+from tacticalrmm.constants import CONFIG_MGMT_CMDS, CustomFieldModel, PAAction, PAStatus
 from tacticalrmm.test import TacticalTestCase
 
 from .consumers import DashInfo
@@ -40,6 +40,12 @@ class TestCodeSign(TacticalTestCase):
         self.assertEqual(r.status_code, 400)
 
         self.check_not_authenticated("patch", self.url)
+
+    def test_delete_codesign(self):
+        r = self.client.delete(self.url)
+        self.assertEqual(r.status_code, 200)
+
+        self.check_not_authenticated("delete", self.url)
 
 
 class TestConsumers(TacticalTestCase):

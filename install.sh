@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-SCRIPT_VERSION="63"
+SCRIPT_VERSION="64"
 SCRIPT_URL='https://raw.githubusercontent.com/scs-ben/tacticalrmm/master/install.sh'
 
 sudo apt install -y curl wget dirmngr gnupg lsb-release
@@ -382,22 +382,12 @@ python manage.py generate_barcode ${RANDBASE} ${djangousername} ${frontenddomain
 deactivate
 read -n 1 -s -r -p "Press any key to continue..."
 
-echo 'Optimizing for number of processors'
-uwsgiprocs=4
-if [[ "$numprocs" == "1" ]]; then
-  uwsgiprocs=2
-else
-  uwsgiprocs=$numprocs
-fi
-
 uwsgini="$(cat << EOF
 [uwsgi]
 chdir = /rmm/api/tacticalrmm
 module = tacticalrmm.wsgi
 home = /rmm/api/env
 master = true
-processes = ${uwsgiprocs}
-threads = ${uwsgiprocs}
 enable-threads = true
 socket = /rmm/api/tacticalrmm/tacticalrmm.sock
 harakiri = 300
@@ -407,6 +397,16 @@ vacuum = true
 die-on-term = true
 max-requests = 500
 disable-logging = true
+cheaper-algo = busyness
+cheaper = 4
+cheaper-initial = 4
+workers = 20
+cheaper-step = 2
+cheaper-overload = 3
+cheaper-busyness-min = 5
+cheaper-busyness-max = 10
+# stats = /tmp/stats.socket # uncomment when debugging
+# cheaper-busyness-verbose = true # uncomment when debugging
 EOF
 )"
 echo "${uwsgini}" > /rmm/api/tacticalrmm/app.ini
@@ -554,6 +554,18 @@ server {
         proxy_set_header   X-Real-IP \$remote_addr;
         proxy_set_header   X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header   X-Forwarded-Host \$server_name;
+    }
+
+    location ~ ^/natsws {
+        proxy_pass http://127.0.0.1:9235;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host \$host;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Forwarded-Host \$host:\$server_port;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
 
     location / {
@@ -864,7 +876,7 @@ if [ "$BEHIND_NAT" = true ]; then
     echo -ne "${GREEN}If you will be accessing the web interface of the RMM from the same LAN as this server,${NC}\n"
     echo -ne "${GREEN}you'll need to make sure your 3 subdomains resolve to ${IPV4}${NC}\n"
     echo -ne "${GREEN}This also applies to any agents that will be on the same local network as the rmm.${NC}\n"
-    echo -ne "${GREEN}You'll also need to setup port forwarding in your router on ports 80, 443 and 4222 tcp.${NC}\n\n"
+    echo -ne "${GREEN}You'll also need to setup port forwarding in your router on port 443${NC}\n\n"
 fi
 
 printf >&2 "${YELLOW}Please refer to the github README for next steps${NC}\n\n"

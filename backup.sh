@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-SCRIPT_VERSION="19"
+SCRIPT_VERSION="20"
 SCRIPT_URL='https://raw.githubusercontent.com/scs-ben/tacticalrmm/master/backup.sh'
 
 GREEN='\033[0;32m'
