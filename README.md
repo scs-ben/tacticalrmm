@@ -1,6 +1,6 @@
 # Tactical RMM
 
-![CI Tests](https://github.com/amidaware/tacticalrmm/actions/workflows/ci-tests.yml/badge.svg?branch=develop)
+![CI Tests](https://github.com/scs-ben/tacticalrmm/actions/workflows/ci-tests.yml/badge.svg?branch=develop)
 [![codecov](https://codecov.io/gh/amidaware/tacticalrmm/branch/develop/graph/badge.svg?token=8ACUPVPTH6)](https://codecov.io/gh/amidaware/tacticalrmm)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 
@@ -33,7 +33,7 @@ Demo database resets every hour. A lot of features are disabled for obvious reas
 - Windows 7, 8.1, 10, 11, Server 2008R2, 2012R2, 2016, 2019, 2022
 
 ## Linux agent versions supported
-- Any distro with systemd
+- Any distro with systemd which includes but is not limited to: Debian (10, 11), Ubuntu x86_64 (18.04, 20.04, 22.04), Synology 7, centos, freepbx and more!
 
 ## Installation / Backup / Restore / Usage
 
