@@ -31,7 +31,7 @@ class TestRecovery(TacticalTestCase):
 
         url = f"/agents/{agent.agent_id}/recover/"
 
-        # test successfull scsagent recovery
+        # test successfull tacticalagent recovery
         data = {"mode": "tacagent"}
         r = self.client.post(url, data, format="json")
         self.assertEqual(r.status_code, 200)

@@ -18,7 +18,7 @@ class TestAgentUtils(TacticalTestCase):
 
         # test without token
         r = get_agent_url(goarch="amd64", plat="windows", token="")
-        expected = f"https://github.com/scs-ben/rmmagent/releases/download/v{ver}/tacticalagent-v{ver}-windows-amd64.exe"
+        expected = f"https://github.com/amidaware/rmmagent/releases/download/v{ver}/tacticalagent-v{ver}-windows-amd64.exe"
         self.assertEqual(r, expected)
 
         # test with token

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-SCRIPT_VERSION="64"
-SCRIPT_URL='https://raw.githubusercontent.com/scs-ben/tacticalrmm/master/install.sh'
+SCRIPT_VERSION="67"
+SCRIPT_URL='https://raw.githubusercontent.com/amidaware/tacticalrmm/master/install.sh'
 
 sudo apt install -y curl wget dirmngr gnupg lsb-release
 
@@ -12,7 +12,7 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 SCRIPTS_DIR='/opt/trmm-community-scripts'
-PYTHON_VER='3.10.4'
+PYTHON_VER='3.10.6'
 SETTINGS_FILE='/rmm/api/tacticalrmm/tacticalrmm/settings.py'
 
 TMP_FILE=$(mktemp -p "" "rmminstall_XXXXXXXXXX")
@@ -172,10 +172,55 @@ sudo chmod 775 -R /etc/letsencrypt
 
 print_green 'Installing Nginx'
 
+wget -qO - https://nginx.org/packages/keys/nginx_signing.key | sudo apt-key add -
+
+nginxrepo="$(cat << EOF
+deb https://nginx.org/packages/$osname/ $codename nginx
+deb-src https://nginx.org/packages/$osname/ $codename nginx
+EOF
+)"
+echo "${nginxrepo}" | sudo tee /etc/apt/sources.list.d/nginx.list > /dev/null
+
+sudo apt update
 sudo apt install -y nginx
 sudo systemctl stop nginx
-sudo sed -i 's/worker_connections.*/worker_connections 2048;/g' /etc/nginx/nginx.conf
-sudo sed -i 's/# server_names_hash_bucket_size.*/server_names_hash_bucket_size 64;/g' /etc/nginx/nginx.conf
+
+nginxdefaultconf='/etc/nginx/nginx.conf'
+
+nginxconf="$(cat << EOF
+worker_rlimit_nofile 1000000;
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+include /etc/nginx/modules-enabled/*.conf;
+
+events {
+        worker_connections 4096;
+}
+
+http {
+        sendfile on;
+        tcp_nopush on;
+        types_hash_max_size 2048;
+        server_names_hash_bucket_size 64;
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_prefer_server_ciphers on;
+        access_log /var/log/nginx/access.log;
+        error_log /var/log/nginx/error.log;
+        gzip on;
+        include /etc/nginx/conf.d/*.conf;
+        include /etc/nginx/sites-enabled/*;
+}
+EOF
+)"
+echo "${nginxconf}" | sudo tee $nginxdefaultconf > /dev/null
+
+for i in sites-available sites-enabled
+do
+sudo mkdir -p /etc/nginx/$i
+done
 
 print_green 'Installing NodeJS'
 
@@ -239,7 +284,7 @@ sudo mkdir /rmm
 sudo chown ${USER}:${USER} /rmm
 sudo mkdir -p /var/log/celery
 sudo chown ${USER}:${USER} /var/log/celery
-git clone https://github.com/scs-ben/tacticalrmm.git /rmm/
+git clone https://github.com/amidaware/tacticalrmm.git /rmm/
 cd /rmm
 git config user.email "admin@example.com"
 git config user.name "Bob"
@@ -247,7 +292,7 @@ git checkout master
 
 sudo mkdir -p ${SCRIPTS_DIR}
 sudo chown ${USER}:${USER} ${SCRIPTS_DIR}
-git clone https://github.com/scs-ben/community-scripts.git ${SCRIPTS_DIR}/
+git clone https://github.com/amidaware/community-scripts.git ${SCRIPTS_DIR}/
 cd ${SCRIPTS_DIR}
 git config user.email "admin@example.com"
 git config user.name "Bob"
@@ -299,8 +344,8 @@ meshcfg="$(cat << EOF
   },
   "domains": {
     "": {
-      "Title": "SCS RMM",
-      "Title2": "SCS RMM",
+      "Title": "Tactical RMM",
+      "Title2": "Tactical RMM",
       "NewAccounts": false,
       "CertUrl": "https://${meshdomain}:443/",
       "GeoLocation": true,
@@ -477,7 +522,7 @@ echo "${natsservice}" | sudo tee /etc/systemd/system/nats.service > /dev/null
 
 natsapi="$(cat << EOF
 [Unit]
-Description=SCSRMM Nats Api v1
+Description=TacticalRMM Nats Api v1
 After=nats.service
 
 [Service]
@@ -515,7 +560,7 @@ server {
 }
 
 server {
-    listen 443 ssl;
+    listen 443 ssl reuseport;
     listen [::]:443 ssl;
     server_name ${rmmdomain};
     client_max_body_size 300M;
@@ -731,7 +776,7 @@ fi
 print_green 'Installing the frontend'
 
 webtar="trmm-web-v${WEB_VERSION}.tar.gz"
-wget -q https://github.com/scs-ben/tacticalrmm-web/releases/download/v${WEB_VERSION}/${webtar} -O /tmp/${webtar}
+wget -q https://github.com/amidaware/tacticalrmm-web/releases/download/v${WEB_VERSION}/${webtar} -O /tmp/${webtar}
 sudo mkdir -p /var/www/rmm
 sudo tar -xzf /tmp/${webtar} -C /var/www/rmm
 echo "window._env_ = {PROD_URL: \"https://${rmmdomain}\"}" | sudo tee /var/www/rmm/dist/env-config.js > /dev/null

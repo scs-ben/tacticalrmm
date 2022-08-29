@@ -6,7 +6,7 @@ from django.conf import settings
 from django.http import FileResponse
 
 from core.utils import get_core_settings, get_mesh_device_id, get_mesh_ws_url
-from tacticalrmm.constants import AgentPlat, MeshAgentIdent
+from tacticalrmm.constants import MeshAgentIdent
 
 
 def get_agent_url(*, goarch: str, plat: str, token: str = "") -> str:
@@ -21,7 +21,7 @@ def get_agent_url(*, goarch: str, plat: str, token: str = "") -> str:
         }
         return settings.AGENTS_URL + urllib.parse.urlencode(params)
 
-    return f"https://github.com/scs-ben/rmmagent/releases/download/v{ver}/tacticalagent-v{ver}-{plat}-{goarch}.exe"
+    return f"https://github.com/amidaware/rmmagent/releases/download/v{ver}/tacticalagent-v{ver}-{plat}-{goarch}.exe"
 
 
 def generate_linux_install(

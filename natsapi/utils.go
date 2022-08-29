@@ -15,7 +15,7 @@ import (
 
 func setupNatsOptions(key string) []nats.Option {
 	opts := []nats.Option{
-		nats.Name("SCSRMM"),
+		nats.Name("TacticalRMM"),
 		nats.UserInfo("tacticalrmm", key),
 		nats.ReconnectWait(time.Second * 2),
 		nats.RetryOnFailedConnect(true),

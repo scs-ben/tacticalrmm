@@ -58,7 +58,7 @@ class TOTPSetupSerializer(ModelSerializer):
 
     def get_qr_url(self, obj):
         return pyotp.totp.TOTP(obj.totp_key).provisioning_uri(
-            obj.username, issuer_name="SCS RMM"
+            obj.username, issuer_name="Tactical RMM"
         )
 
 

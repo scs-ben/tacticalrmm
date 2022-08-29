@@ -752,7 +752,7 @@
         "cpu_percent": "0.0"
     },
     {
-        "name": "scsrmm.exe",
+        "name": "tacticalrmm.exe",
         "pid": 7176,
         "membytes": 24236032,
         "username": "NT AUTHORITY\\SYSTEM",
@@ -776,7 +776,7 @@
         "cpu_percent": "0.0"
     },
     {
-        "name": "scsrmm.exe",
+        "name": "tacticalrmm.exe",
         "pid": 4100,
         "membytes": 29609984,
         "username": "NT AUTHORITY\\SYSTEM",

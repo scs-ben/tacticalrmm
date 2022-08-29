@@ -2427,18 +2427,18 @@
         "username": "LocalSystem",
         "autodelay": false,
         "start_type": "Automatic",
-        "description": "SCS RMM RPC Service",
-        "display_name": "SCS RMM RPC Service"
+        "description": "Tactical RMM RPC Service",
+        "display_name": "Tactical RMM RPC Service"
     },
     {
         "pid": 53168,
-        "name": "scsagent",
+        "name": "tacticalagent",
         "status": "running",
         "binpath": "\"C:\\Program Files\\TacticalAgent\\nssm.exe\"",
         "username": "LocalSystem",
         "autodelay": false,
         "start_type": "Automatic",
-        "description": "SCS RMM Agent",
-        "display_name": "SCS RMM Agent"
+        "description": "Tactical RMM Agent",
+        "display_name": "Tactical RMM Agent"
     }
 ]

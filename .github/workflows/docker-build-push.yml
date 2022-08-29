@@ -1,4 +1,4 @@
-name: Publish SCS Docker Images
+name: Publish Tactical Docker Images
 on:
   push:
     tags:
@@ -27,7 +27,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
         
-      - name: Build and Push SCS Image
+      - name: Build and Push Tactical Image
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -37,7 +37,7 @@ jobs:
           platforms: linux/amd64
           tags: tacticalrmm/tactical:${{ steps.prep.outputs.version }},tacticalrmm/tactical:latest
           
-      - name: Build and Push SCS MeshCentral Image
+      - name: Build and Push Tactical MeshCentral Image
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -47,7 +47,7 @@ jobs:
           platforms: linux/amd64
           tags: tacticalrmm/tactical-meshcentral:${{ steps.prep.outputs.version }},tacticalrmm/tactical-meshcentral:latest
           
-      - name: Build and Push SCS NATS Image
+      - name: Build and Push Tactical NATS Image
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -57,7 +57,7 @@ jobs:
           platforms: linux/amd64
           tags: tacticalrmm/tactical-nats:${{ steps.prep.outputs.version }},tacticalrmm/tactical-nats:latest
           
-      - name: Build and Push SCS Frontend Image
+      - name: Build and Push Tactical Frontend Image
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -67,7 +67,7 @@ jobs:
           platforms: linux/amd64
           tags: tacticalrmm/tactical-frontend:${{ steps.prep.outputs.version }},tacticalrmm/tactical-frontend:latest
           
-      - name: Build and Push SCS Nginx Image
+      - name: Build and Push Tactical Nginx Image
         uses: docker/build-push-action@v2
         with:
           context: .

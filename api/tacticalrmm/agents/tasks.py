@@ -153,6 +153,7 @@ def run_script_email_results_task(
     emails: list[str],
     args: list[str] = [],
     history_pk: int = 0,
+    run_as_user: bool = False,
 ):
     agent = Agent.objects.get(pk=agentpk)
     script = Script.objects.get(pk=scriptpk)
@@ -163,6 +164,7 @@ def run_script_email_results_task(
         timeout=nats_timeout,
         wait=True,
         history_pk=history_pk,
+        run_as_user=run_as_user,
     )
     if r == "timeout":
         DebugLog.error(
@@ -213,7 +215,7 @@ def run_script_email_results_task(
 def clear_faults_task(older_than_days: int) -> None:
     from alerts.models import Alert
 
-    # https://github.com/scs-ben/tacticalrmm/issues/484
+    # https://github.com/amidaware/tacticalrmm/issues/484
     agents = Agent.objects.exclude(last_seen__isnull=True).filter(
         last_seen__lt=djangotime.now() - djangotime.timedelta(days=older_than_days)
     )

@@ -21,7 +21,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f"User {username} doesn't exist"))
             return
 
-        domain = "SCS RMM"
+        domain = "Tactical RMM"
         nginx = "/etc/nginx/sites-available/frontend.conf"
         found = None
         if os.path.exists(nginx):

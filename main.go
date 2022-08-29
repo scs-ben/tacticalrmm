@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	"github.com/scs-ben/tacticalrmm/natsapi"
+	"github.com/amidaware/tacticalrmm/natsapi"
 	"github.com/sirupsen/logrus"
 )
 
 var (
-	version = "3.1.0"
+	version = "3.2.0"
 	log     = logrus.New()
 )
 

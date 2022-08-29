@@ -532,11 +532,16 @@ class Agent(BaseAuditModel):
         wait: bool = False,
         run_on_any: bool = False,
         history_pk: int = 0,
+        run_as_user: bool = False,
     ) -> Any:
 
         from scripts.models import Script
 
         script = Script.objects.get(pk=scriptpk)
+
+        # always override if set on script model
+        if script.run_as_user:
+            run_as_user = True
 
         parsed_args = script.parse_script_args(self, script.shell, args)
 
@@ -548,6 +553,7 @@ class Agent(BaseAuditModel):
                 "code": script.code,
                 "shell": script.shell,
             },
+            "run_as_user": run_as_user,
         }
 
         if history_pk != 0:
@@ -742,10 +748,10 @@ class Agent(BaseAuditModel):
             cache_key = f"agent_{self.agent_id}_checks"
 
         elif self.policy:
-            cache_key = f"site_{self.monitoring_type}_{self.site_id}_policy_{self.policy_id}_checks"
+            cache_key = f"site_{self.monitoring_type}_{self.plat}_{self.site_id}_policy_{self.policy_id}_checks"
 
         else:
-            cache_key = f"site_{self.monitoring_type}_{self.site_id}_checks"
+            cache_key = f"site_{self.monitoring_type}_{self.plat}_{self.site_id}_checks"
 
         cached_checks = cache.get(cache_key)
         if isinstance(cached_checks, list):
@@ -767,10 +773,10 @@ class Agent(BaseAuditModel):
             cache_key = f"agent_{self.agent_id}_tasks"
 
         elif self.policy:
-            cache_key = f"site_{self.monitoring_type}_{self.site_id}_policy_{self.policy_id}_tasks"
+            cache_key = f"site_{self.monitoring_type}_{self.plat}_{self.site_id}_policy_{self.policy_id}_tasks"
 
         else:
-            cache_key = f"site_{self.monitoring_type}_{self.site_id}_tasks"
+            cache_key = f"site_{self.monitoring_type}_{self.plat}_{self.site_id}_tasks"
 
         cached_tasks = cache.get(cache_key)
         if isinstance(cached_tasks, list):
@@ -778,7 +784,7 @@ class Agent(BaseAuditModel):
         else:
             # get agent tasks based on policies
             tasks = Policy.get_policy_tasks(self)
-            cache.set(f"site_{self.site_id}_tasks", tasks, 600)
+            cache.set(cache_key, tasks, 600)
             return tasks
 
     def _do_nats_debug(self, agent: "Agent", message: str) -> None:
@@ -830,31 +836,31 @@ class Agent(BaseAuditModel):
         """
         if mode == "tacagent":
             if self.is_posix:
-                cmd = "systemctl restart scsagent.service"
+                cmd = "systemctl restart tacticalagent.service"
                 shell = 3
             else:
-                cmd = "net stop scsrmm & taskkill /F /IM scsrmm.exe & net start scsrmm"
+                cmd = "net stop tacticalrmm & taskkill /F /IM tacticalrmm.exe & net start tacticalrmm"
                 shell = 1
 
             asyncio.run(
                 send_command_with_mesh(cmd, mesh_uri, self.mesh_node_id, shell, 0)
             )
-            return ("ok", False)
+            return "ok", False
 
         elif mode == "mesh":
             data = {"func": "recover", "payload": {"mode": mode}}
             if wait:
                 r = asyncio.run(self.nats_cmd(data, timeout=20))
                 if r == "ok":
-                    return ("ok", False)
+                    return "ok", False
                 else:
-                    return (str(r), True)
+                    return str(r), True
             else:
                 asyncio.run(self.nats_cmd(data, timeout=20, wait=False))
 
-            return ("ok", False)
+            return "ok", False
 
-        return ("invalid", True)
+        return "invalid", True
 
     @staticmethod
     def serialize(agent: "Agent") -> Dict[str, Any]:

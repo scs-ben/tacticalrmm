@@ -403,6 +403,7 @@ class TestAgentViews(TacticalTestCase):
             "cmd": "ipconfig",
             "shell": "cmd",
             "timeout": 30,
+            "run_as_user": False,
         }
         mock_ret.return_value = "nt authority\\system"
         r = self.client.post(url, data, format="json")
@@ -417,16 +418,20 @@ class TestAgentViews(TacticalTestCase):
 
     @patch("agents.models.Agent.nats_cmd")
     def test_reboot_later(self, nats_cmd):
+        nats_cmd.return_value = "ok"
         url = f"{base_url}/{self.agent.agent_id}/reboot/"
 
-        data = {
-            "datetime": "2025-08-29T18:41:02",
-        }
+        # ensure we don't allow dates in past
+        data = {"datetime": "2022-07-11T01:51"}
+        r = self.client.patch(url, data, format="json")
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(r.data, "Date cannot be set in the past")
 
-        nats_cmd.return_value = "ok"
+        # test with date in future
+        data["datetime"] = "2027-08-29T18:41"
         r = self.client.patch(url, data, format="json")
         self.assertEqual(r.status_code, 200)
-        self.assertEqual(r.data["time"], "August 29, 2025 at 06:41 PM")
+        self.assertEqual(r.data["time"], "August 29, 2027 at 06:41 PM")
         self.assertEqual(r.data["agent"], self.agent.hostname)
 
         nats_data = {
@@ -439,12 +444,12 @@ class TestAgentViews(TacticalTestCase):
                 "multiple_instances": 2,
                 "trigger": "runonce",
                 "name": r.data["task_name"],
-                "start_year": 2025,
+                "start_year": 2027,
                 "start_month": 8,
                 "start_day": 29,
                 "start_hour": 18,
                 "start_min": 41,
-                "expire_year": 2025,
+                "expire_year": 2027,
                 "expire_month": 8,
                 "expire_day": 29,
                 "expire_hour": 18,
@@ -534,6 +539,7 @@ class TestAgentViews(TacticalTestCase):
             "output": "wait",
             "args": [],
             "timeout": 15,
+            "run_as_user": False,
         }
 
         r = self.client.post(url, data, format="json")
@@ -543,7 +549,12 @@ class TestAgentViews(TacticalTestCase):
             raise AgentHistory.DoesNotExist
 
         run_script.assert_called_with(
-            scriptpk=script.pk, args=[], timeout=18, wait=True, history_pk=hist.pk
+            scriptpk=script.pk,
+            args=[],
+            timeout=18,
+            wait=True,
+            history_pk=hist.pk,
+            run_as_user=False,
         )
         run_script.reset_mock()
 
@@ -555,6 +566,7 @@ class TestAgentViews(TacticalTestCase):
             "timeout": 15,
             "emailMode": "default",
             "emails": ["admin@example.com", "bob@example.com"],
+            "run_as_user": False,
         }
         r = self.client.post(url, data, format="json")
         self.assertEqual(r.status_code, 200)
@@ -564,6 +576,7 @@ class TestAgentViews(TacticalTestCase):
             nats_timeout=18,
             emails=[],
             args=["abc", "123"],
+            run_as_user=False,
         )
         email_task.reset_mock()
 
@@ -577,6 +590,7 @@ class TestAgentViews(TacticalTestCase):
             nats_timeout=18,
             emails=["admin@example.com", "bob@example.com"],
             args=["abc", "123"],
+            run_as_user=False,
         )
 
         # test fire and forget
@@ -585,6 +599,7 @@ class TestAgentViews(TacticalTestCase):
             "output": "forget",
             "args": ["hello", "world"],
             "timeout": 22,
+            "run_as_user": True,
         }
 
         r = self.client.post(url, data, format="json")
@@ -594,7 +609,11 @@ class TestAgentViews(TacticalTestCase):
             raise AgentHistory.DoesNotExist
 
         run_script.assert_called_with(
-            scriptpk=script.pk, args=["hello", "world"], timeout=25, history_pk=hist.pk
+            scriptpk=script.pk,
+            args=["hello", "world"],
+            timeout=25,
+            history_pk=hist.pk,
+            run_as_user=True,
         )
         run_script.reset_mock()
 
@@ -609,6 +628,7 @@ class TestAgentViews(TacticalTestCase):
             "timeout": 22,
             "custom_field": custom_field.pk,
             "save_all_output": True,
+            "run_as_user": False,
         }
 
         r = self.client.post(url, data, format="json")
@@ -623,6 +643,7 @@ class TestAgentViews(TacticalTestCase):
             timeout=25,
             wait=True,
             history_pk=hist.pk,
+            run_as_user=False,
         )
         run_script.reset_mock()
 
@@ -640,6 +661,7 @@ class TestAgentViews(TacticalTestCase):
             "timeout": 22,
             "custom_field": custom_field.pk,
             "save_all_output": False,
+            "run_as_user": False,
         }
 
         r = self.client.post(url, data, format="json")
@@ -654,6 +676,7 @@ class TestAgentViews(TacticalTestCase):
             timeout=25,
             wait=True,
             history_pk=hist.pk,
+            run_as_user=False,
         )
         run_script.reset_mock()
 
@@ -673,6 +696,7 @@ class TestAgentViews(TacticalTestCase):
             "timeout": 22,
             "custom_field": custom_field.pk,
             "save_all_output": False,
+            "run_as_user": False,
         }
 
         r = self.client.post(url, data, format="json")
@@ -687,6 +711,7 @@ class TestAgentViews(TacticalTestCase):
             timeout=25,
             wait=True,
             history_pk=hist.pk,
+            run_as_user=False,
         )
         run_script.reset_mock()
 
@@ -703,6 +728,7 @@ class TestAgentViews(TacticalTestCase):
             "output": "note",
             "args": ["hello", "world"],
             "timeout": 22,
+            "run_as_user": False,
         }
 
         r = self.client.post(url, data, format="json")
@@ -717,6 +743,7 @@ class TestAgentViews(TacticalTestCase):
             timeout=25,
             wait=True,
             history_pk=hist.pk,
+            run_as_user=False,
         )
         run_script.reset_mock()
 

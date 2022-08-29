@@ -103,7 +103,7 @@ def email_test(request):
     core = get_core_settings()
 
     msg, ok = core.send_mail(
-        subject="Test from SCS RMM", body="This is a test message", test=True
+        subject="Test from Tactical RMM", body="This is a test message", test=True
     )
     if not ok:
         return notify_error(msg)
@@ -424,6 +424,7 @@ def status(request):
 
     ret = {
         "version": settings.TRMM_VERSION,
+        "latest_agent_version": settings.LATEST_AGENT_VER,
         "agent_count": Agent.objects.count(),
         "client_count": Client.objects.count(),
         "site_count": Site.objects.count(),

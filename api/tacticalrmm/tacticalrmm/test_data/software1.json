@@ -1170,12 +1170,12 @@
         "install_date": "0001-01-01 00:00:00 +0000 UTC"
     },
     {
-        "name": "SCS RMM Agent",
+        "name": "Tactical RMM Agent",
         "size": "33.0 MB",
         "source": "",
         "version": "1.1.0",
         "location": "C:\\Program Files\\TacticalAgent\\",
-        "publisher": "SCS Techs",
+        "publisher": "Tactical Techs",
         "uninstall": "\"C:\\Program Files\\TacticalAgent\\unins000.exe\"",
         "install_date": "2020-11-25 00:00:00 +0000 UTC"
     },

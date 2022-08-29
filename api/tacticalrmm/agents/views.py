@@ -12,6 +12,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone as djangotime
 from meshctrl.utils import get_login_token
 from packaging import version as pyver
+from rest_framework import serializers
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
@@ -29,17 +30,19 @@ from scripts.models import Script
 from scripts.tasks import handle_bulk_command_task, handle_bulk_script_task
 from tacticalrmm.constants import (
     AGENT_DEFER,
+    AGENT_TABLE_DEFER,
     AGENT_STATUS_OFFLINE,
     AGENT_STATUS_ONLINE,
     AgentHistoryType,
     AgentMonType,
     AgentPlat,
     CustomFieldModel,
+    DebugLogType,
     EvtLogNames,
     PAAction,
     PAStatus,
 )
-from tacticalrmm.helpers import notify_error
+from tacticalrmm.helpers import date_is_in_past, notify_error
 from tacticalrmm.permissions import (
     _has_perm_on_agent,
     _has_perm_on_client,
@@ -113,7 +116,7 @@ class GetAgents(APIView):
                 Agent.objects.filter_by_role(request.user)  # type: ignore
                 .filter(monitoring_type_filter)
                 .filter(client_site_filter)
-                .defer(*AGENT_DEFER)
+                .defer(*AGENT_TABLE_DEFER)
                 .select_related(
                     "site__server_policy",
                     "site__workstation_policy",
@@ -165,6 +168,24 @@ class GetAgents(APIView):
 class GetUpdateDeleteAgent(APIView):
     permission_classes = [IsAuthenticated, AgentPerms]
 
+    class InputSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Agent
+            fields = [
+                "maintenance_mode",  # TODO separate this
+                "policy",  # TODO separate this
+                "monitoring_type",
+                "description",
+                "overdue_email_alert",
+                "overdue_text_alert",
+                "overdue_dashboard_alert",
+                "offline_time",
+                "overdue_time",
+                "check_interval",
+                "time_zone",
+                "site",
+            ]
+
     # get agent details
     def get(self, request, agent_id):
         agent = get_object_or_404(Agent, agent_id=agent_id)
@@ -174,9 +195,9 @@ class GetUpdateDeleteAgent(APIView):
     def put(self, request, agent_id):
         agent = get_object_or_404(Agent, agent_id=agent_id)
 
-        a_serializer = AgentSerializer(instance=agent, data=request.data, partial=True)
-        a_serializer.is_valid(raise_exception=True)
-        a_serializer.save()
+        s = self.InputSerializer(instance=agent, data=request.data, partial=True)
+        s.is_valid(raise_exception=True)
+        s.save()
 
         if "winupdatepolicy" in request.data.keys():
             policy = agent.winupdatepolicy.get()  # type: ignore
@@ -225,8 +246,14 @@ class GetUpdateDeleteAgent(APIView):
         mesh_id = agent.mesh_node_id
         agent.delete()
         reload_nats()
-        uri = get_mesh_ws_url()
-        asyncio.run(remove_mesh_agent(uri, mesh_id))
+        try:
+            uri = get_mesh_ws_url()
+            asyncio.run(remove_mesh_agent(uri, mesh_id))
+        except Exception as e:
+            DebugLog.error(
+                message=f"Unable to remove agent {name} from meshcentral database: {str(e)}",
+                log_type=DebugLogType.AGENT_ISSUES,
+            )
         return Response(f"{name} will now be uninstalled.")
 
 
@@ -408,6 +435,7 @@ def send_raw_cmd(request, agent_id):
             "command": request.data["cmd"],
             "shell": shell,
         },
+        "run_as_user": request.data["run_as_user"],
     }
 
     hist = AgentHistory.objects.create(
@@ -452,11 +480,14 @@ class Reboot(APIView):
             return notify_error(f"Not currently implemented for {agent.plat}")
 
         try:
-            obj = dt.datetime.strptime(request.data["datetime"], "%Y-%m-%dT%H:%M:%S")
+            obj = dt.datetime.strptime(request.data["datetime"], "%Y-%m-%dT%H:%M")
         except Exception:
             return notify_error("Invalid date")
 
-        task_name = "SCSRMM_SchedReboot_" + "".join(
+        if date_is_in_past(datetime_obj=obj, agent_tz=agent.timezone):
+            return notify_error("Date cannot be set in the past")
+
+        task_name = "TacticalRMM_SchedReboot_" + "".join(
             random.choice(string.ascii_letters) for _ in range(10)
         )
 
@@ -577,7 +608,7 @@ def install_agent(request):
             "-n",
             "5",
             "&&",
-            r'"C:\Program Files\SCSAgent\scsrmm.exe"',
+            r'"C:\Program Files\TacticalAgent\tacticalrmm.exe"',
             "-m",
             "install",
             "--api",
@@ -681,6 +712,7 @@ def run_script(request, agent_id):
     script = get_object_or_404(Script, pk=request.data["script"])
     output = request.data["output"]
     args = request.data["args"]
+    run_as_user: bool = request.data["run_as_user"]
     req_timeout = int(request.data["timeout"]) + 3
 
     AuditLog.audit_script_run(
@@ -705,6 +737,7 @@ def run_script(request, agent_id):
             timeout=req_timeout,
             wait=True,
             history_pk=history_pk,
+            run_as_user=run_as_user,
         )
         return Response(r)
 
@@ -718,6 +751,7 @@ def run_script(request, agent_id):
             nats_timeout=req_timeout,
             emails=emails,
             args=args,
+            run_as_user=run_as_user,
         )
     elif output == "collector":
         from core.models import CustomField
@@ -728,6 +762,7 @@ def run_script(request, agent_id):
             timeout=req_timeout,
             wait=True,
             history_pk=history_pk,
+            run_as_user=run_as_user,
         )
 
         custom_field = CustomField.objects.get(pk=request.data["custom_field"])
@@ -756,13 +791,18 @@ def run_script(request, agent_id):
             timeout=req_timeout,
             wait=True,
             history_pk=history_pk,
+            run_as_user=run_as_user,
         )
 
         Note.objects.create(agent=agent, user=request.user, note=r)
         return Response(r)
     else:
         agent.run_script(
-            scriptpk=script.pk, args=args, timeout=req_timeout, history_pk=history_pk
+            scriptpk=script.pk,
+            args=args,
+            timeout=req_timeout,
+            history_pk=history_pk,
+            run_as_user=run_as_user,
         )
 
     return Response(f"{script.name} will now be run on {agent.hostname}")
@@ -897,7 +937,7 @@ def bulk(request):
             shell,
             request.data["timeout"],
             request.user.username[:50],
-            run_on_offline=request.data["offlineAgents"],
+            request.data["run_as_user"],
         )
         return Response(f"Command will now be run on {len(agents)} agents")
 
@@ -909,6 +949,7 @@ def bulk(request):
             request.data["args"],
             request.data["timeout"],
             request.user.username[:50],
+            request.data["run_as_user"],
         )
         return Response(f"{script.name} will now be run on {len(agents)} agents")
 

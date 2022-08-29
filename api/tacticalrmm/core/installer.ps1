@@ -13,9 +13,9 @@ $apilink = $downloadlink.split('/')
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$serviceName = 'scsagent'
+$serviceName = 'tacticalagent'
 If (Get-Service $serviceName -ErrorAction SilentlyContinue) {
-    write-host ('SCS RMM Is Already Installed')
+    write-host ('Tactical RMM Is Already Installed')
 } Else {
     $OutPath = $env:TMP
     $output = $innosetup
@@ -39,9 +39,8 @@ If (Get-Service $serviceName -ErrorAction SilentlyContinue) {
         $DefenderStatus = Get-MpComputerStatus | select  AntivirusEnabled
         if ($DefenderStatus -match "True") {
             Add-MpPreference -ExclusionPath 'C:\Program Files\TacticalAgent\*'
-            Add-MpPreference -ExclusionPath 'C:\Windows\Temp\winagent-v*.exe'
             Add-MpPreference -ExclusionPath 'C:\Program Files\Mesh Agent\*'
-            Add-MpPreference -ExclusionPath 'C:\Windows\Temp\trmm*\*'
+            Add-MpPreference -ExclusionPath 'C:\ProgramData\TacticalRMM\*'
         }
     }
     Catch {
@@ -62,7 +61,7 @@ If (Get-Service $serviceName -ErrorAction SilentlyContinue) {
             Start-Process -FilePath $OutPath\$output -ArgumentList ('/VERYSILENT /SUPPRESSMSGBOXES') -Wait
             write-host ('Extracting...')
             Start-Sleep -s 5
-            Start-Process -FilePath "C:\Program Files\TacticalAgent\scsrmm.exe" -ArgumentList $installArgs -Wait
+            Start-Process -FilePath "C:\Program Files\TacticalAgent\tacticalrmm.exe" -ArgumentList $installArgs -Wait
             exit 0
         }
         Catch

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-SCRIPT_VERSION="136"
-SCRIPT_URL='https://raw.githubusercontent.com/scs-ben/tacticalrmm/master/update.sh'
-LATEST_SETTINGS_URL='https://raw.githubusercontent.com/scs-ben/tacticalrmm/master/api/tacticalrmm/tacticalrmm/settings.py'
+SCRIPT_VERSION="139"
+SCRIPT_URL='https://raw.githubusercontent.com/amidaware/tacticalrmm/master/update.sh'
+LATEST_SETTINGS_URL='https://raw.githubusercontent.com/amidaware/tacticalrmm/master/api/tacticalrmm/tacticalrmm/settings.py'
 YELLOW='\033[1;33m'
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -10,7 +10,7 @@ NC='\033[0m'
 THIS_SCRIPT=$(readlink -f "$0")
 
 SCRIPTS_DIR='/opt/trmm-community-scripts'
-PYTHON_VER='3.10.4'
+PYTHON_VER='3.10.6'
 SETTINGS_FILE='/rmm/api/tacticalrmm/tacticalrmm/settings.py'
 
 TMP_FILE=$(mktemp -p "" "rmmupdate_XXXXXXXXXX")
@@ -120,13 +120,6 @@ if ! [[ $CHECK_NATS_WEBSOCKET ]]; then
   ' $rmmconf)" | sudo tee $rmmconf > /dev/null
 fi
 
-if ! sudo nginx -t > /dev/null 2>&1; then
-  sudo nginx -t
-  echo -ne "\n"
-  echo -ne "${RED}You have syntax errors in your nginx configs. See errors above. Please fix them and re-run this script.${NC}\n"
-  echo -ne "${RED}Aborting...${NC}\n"
-  exit 1
-fi
 
 for i in nginx nats-api nats rmm daphne celery celerybeat
 do
@@ -165,13 +158,53 @@ EOF
 )"
 echo "${uwsgini}" > /rmm/api/tacticalrmm/app.ini
 
-CHECK_NGINX_WORKER_CONN=$(grep "worker_connections 2048" /etc/nginx/nginx.conf)
-if ! [[ $CHECK_NGINX_WORKER_CONN ]]; then
-  printf >&2 "${GREEN}Changing nginx worker connections to 2048${NC}\n"
-  sudo sed -i 's/worker_connections.*/worker_connections 2048;/g' /etc/nginx/nginx.conf
+
+if [ ! -f /etc/apt/sources.list.d/nginx.list ]; then
+osname=$(lsb_release -si); osname=${osname^}
+osname=$(echo "$osname" | tr  '[A-Z]' '[a-z]')
+codename=$(lsb_release -sc)
+nginxrepo="$(cat << EOF
+deb https://nginx.org/packages/$osname/ $codename nginx
+deb-src https://nginx.org/packages/$osname/ $codename nginx
+EOF
+)"
+echo "${nginxrepo}" | sudo tee /etc/apt/sources.list.d/nginx.list > /dev/null
+wget -qO - https://nginx.org/packages/keys/nginx_signing.key | sudo apt-key add -
+sudo apt update
+sudo apt install -y nginx
 fi
 
-sudo sed -i 's/# server_names_hash_bucket_size.*/server_names_hash_bucket_size 64;/g' /etc/nginx/nginx.conf
+nginxdefaultconf='/etc/nginx/nginx.conf'
+CHECK_NGINX_WORKER_CONN=$(grep "worker_connections 4096" $nginxdefaultconf)
+if ! [[ $CHECK_NGINX_WORKER_CONN ]]; then
+  printf >&2 "${GREEN}Changing nginx worker connections to 4096${NC}\n"
+  sudo sed -i 's/worker_connections.*/worker_connections 4096;/g' $nginxdefaultconf
+fi
+
+CHECK_NGINX_NOLIMIT=$(grep "worker_rlimit_nofile 1000000" $nginxdefaultconf)
+if ! [[ $CHECK_NGINX_NOLIMIT ]]; then
+sudo sed -i '/worker_rlimit_nofile.*/d' $nginxdefaultconf
+printf >&2 "${GREEN}Increasing nginx open file limit${NC}\n"
+sudo sed -i '1s/^/worker_rlimit_nofile 1000000;\
+/' $nginxdefaultconf
+fi
+
+backend_conf='/etc/nginx/sites-available/rmm.conf'
+CHECK_NGINX_REUSEPORT=$(grep reuseport $backend_conf)
+if ! [[ $CHECK_NGINX_REUSEPORT ]]; then
+printf >&2 "${GREEN}Setting nginx reuseport${NC}\n"
+sudo sed -i 's/listen 443 ssl;/listen 443 ssl reuseport;/g' $backend_conf
+fi
+
+sudo sed -i 's/# server_names_hash_bucket_size.*/server_names_hash_bucket_size 64;/g' $nginxdefaultconf
+
+if ! sudo nginx -t > /dev/null 2>&1; then
+  sudo nginx -t
+  echo -ne "\n"
+  echo -ne "${RED}You have syntax errors in your nginx configs. See errors above. Please fix them and re-run this script.${NC}\n"
+  echo -ne "${RED}Aborting...${NC}\n"
+  exit 1
+fi
 
 HAS_PY310=$(python3.10 --version | grep ${PYTHON_VER})
 if ! [[ $HAS_PY310 ]]; then
@@ -248,7 +281,7 @@ git pull
 if [[ ! -d ${SCRIPTS_DIR} ]]; then
   sudo mkdir -p ${SCRIPTS_DIR}
   sudo chown ${USER}:${USER} ${SCRIPTS_DIR}
-  git clone https://github.com/scs-ben/community-scripts.git ${SCRIPTS_DIR}/
+  git clone https://github.com/amidaware/community-scripts.git ${SCRIPTS_DIR}/
   cd ${SCRIPTS_DIR}
   git config user.email "admin@example.com"
   git config user.name "Bob"
@@ -336,7 +369,7 @@ if [ ! -d /var/www/rmm ]; then
 fi
 
 webtar="trmm-web-v${WEB_VERSION}.tar.gz"
-wget -q https://github.com/scs-ben/tacticalrmm-web/releases/download/v${WEB_VERSION}/${webtar} -O /tmp/${webtar}
+wget -q https://github.com/amidaware/tacticalrmm-web/releases/download/v${WEB_VERSION}/${webtar} -O /tmp/${webtar}
 sudo rm -rf /var/www/rmm/dist
 sudo tar -xzf /tmp/${webtar} -C /var/www/rmm
 echo "window._env_ = {PROD_URL: \"https://${API}\"}" | sudo tee /var/www/rmm/dist/env-config.js > /dev/null
